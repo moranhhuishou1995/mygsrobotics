@@ -6,4 +6,4 @@ __pycache__/
 /demos/mini_tracking_windows_V0
 /wangqi_test
 /mini_cad_files
-
+/demos/mini_tracking_linux_V0/TEST/*.txt
