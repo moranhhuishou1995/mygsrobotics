@@ -1,3 +1,9 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+/0_mybuild
+/demos/marker_tracking
+/demos/mini_tracking_windows_V0
+/wangqi_test
+/mini_cad_files
+

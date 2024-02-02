@@ -376,11 +376,11 @@ if __name__ == '__main__':
     output_filepath = os.path.join(curr_dir, "MARKERS")
 
     options = {
-               'USE_MINI_LIVE': False,
+               'USE_MINI_LIVE': True,
                'GPU': False,
                'SHOW_3D': False,
-               'SAVE_MARKER_FLAG': True,
-               'SAVE_VIDEO_FLAG': True,
+               'SAVE_MARKER_FLAG': False,
+               'SAVE_VIDEO_FLAG': False,
                'SAVE_3D_TMD': False,
                'SAVE_3D_PCD': False
                }

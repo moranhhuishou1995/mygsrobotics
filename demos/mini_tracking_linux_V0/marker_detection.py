@@ -91,30 +91,30 @@ def find_marker(frame):
     # diff[diff<0.] = 0.
     # diff[diff>255.] = 255.
     # diff = cv2.GaussianBlur(diff, (int(25/RESCALE), int(25/RESCALE)), 0)
-    #
+    
     # # # Switch image from BGR colorspace to HSV
     # hsv = cv2.cvtColor(diff.astype(np.uint8), cv2.COLOR_BGR2HSV)
-    #
+    
     # # # yellow range in HSV color space
     # yellowMin = (0, 0, 32)
     # yellowMax = (100, 255, 255)
-    #
+    
     # # Sets pixels to white if in yellow range, else will be set to black
     # mask = cv2.inRange(hsv, yellowMin, yellowMax)
 
-    #### masking technique for small dots
+    # ### masking technique for small dots
     # diff = diff.astype('uint8')
     # mask = cv2.inRange(diff, (200, 200, 200), (255, 255, 255))
 
     # gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-    # gray[gray > 200] = 255;
+    # gray[gray > 200] = 255
     # gray[gray < 150] = 0
     # mask = gray
 
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 10,
     #                            param1=50, param2=12, minRadius=1, maxRadius=20)
-    #
+    
     # circles = np.uint16(np.around(circles))
     # for i in circles[0, :]:
     #     # draw the outer circle
@@ -123,7 +123,7 @@ def find_marker(frame):
     #     cv2.circle(diff, (i[0], i[1]), 2, (0, 0, 255), 3)
 
 
-    ##### masking techinique for dots on R1.5
+    # #### masking techinique for dots on R1.5
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # # res = preprocessimg(gray)
     # # mask = cv2.inRange(gray, 20, 70)
@@ -141,15 +141,19 @@ def find_marker(frame):
     # mask = np.asarray(b < 0.50)
     # mask = (mask * 255).astype('uint8')
 
-    ##### masking techinique for dots on mini
+    # #### masking techinique for dots on mini
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # mask = cv2.inRange(gray, 5, 55)
 
-    gray = frame[:,:,1] ### use only the green channel
-    im_blur_3 = cv2.GaussianBlur(gray,(3,3),5)
-    im_blur_8 = cv2.GaussianBlur(gray, (15,15),5)
+    # gray = frame[:, :, 1] ### use only the green channel (0: blue, 1: green, 2: red)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # use grayscale
+    im_blur_3 = cv2.GaussianBlur(gray, (3, 3), 5)
+    im_blur_8 = cv2.GaussianBlur(gray, (15, 15), 5)
     im_blur_sub = im_blur_8 - im_blur_3 + 128
-    mask = cv2.inRange(im_blur_sub, 140, 255)
+    mask = cv2.inRange(im_blur_sub, 134, 255)
+
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
     # ''' normalized cross correlation '''
     template = gkern(l=20, sig=3)
@@ -211,7 +215,7 @@ def draw_flow(frame, flow):
     dx = np.mean(np.abs(np.asarray(Ox) - np.asarray(Cx)))
     dy = np.mean(np.abs(np.asarray(Oy) - np.asarray(Cy)))
     dnet = np.sqrt(dx**2 + dy**2)
-    print (dnet * 0.075, '\n')
+    #print (dnet * 0.075, '\n')
 
 
     K = 1
@@ -219,39 +223,39 @@ def draw_flow(frame, flow):
         for j in range(len(Ox[i])):
             pt1 = (int(Ox[i][j]), int(Oy[i][j]))
             pt2 = (int(Cx[i][j] + K * (Cx[i][j] - Ox[i][j])), int(Cy[i][j] + K * (Cy[i][j] - Oy[i][j])))
-            color = (0, 0, 255)
+            color = (0, 255, 0)
             if Occupied[i][j] <= -1:
                 color = (127, 127, 255)
-            cv2.arrowedLine(frame, pt1, pt2, color, 2,  tipLength=0.25)
+            cv2.arrowedLine(frame, pt1, pt2, color, 1,  tipLength=0.25)
 
 
 def warp_perspective(img):
 
-    TOPLEFT = (175,230)
-    TOPRIGHT = (380,225)
-    BOTTOMLEFT = (10,410)
-    BOTTOMRIGHT = (530,400)
+    TOPLEFT = (175, 230)
+    TOPRIGHT = (380, 225)
+    BOTTOMLEFT = (10, 410)
+    BOTTOMRIGHT = (530, 400)
 
-    WARP_W = 215
-    WARP_H = 215
+    WARP_W = 320
+    WARP_H = 240
 
-    points1=np.float32([TOPLEFT,TOPRIGHT,BOTTOMLEFT,BOTTOMRIGHT])
-    points2=np.float32([[0,0],[WARP_W,0],[0,WARP_H],[WARP_W,WARP_H]])
+    points1 = np.float32([TOPLEFT, TOPRIGHT, BOTTOMLEFT, BOTTOMRIGHT])
+    points2 = np.float32([[0, 0], [WARP_W, 0], [0, WARP_H], [WARP_W, WARP_H]])
 
-    matrix=cv2.getPerspectiveTransform(points1,points2)
+    matrix = cv2.getPerspectiveTransform(points1, points2)
 
-    result = cv2.warpPerspective(img, matrix, (WARP_W,WARP_H))
+    result = cv2.warpPerspective(img, matrix, (WARP_W, WARP_H))
 
     return result
 
 
 def init_HSR(img):
-    DIM=(640, 480)
+    DIM = (640, 480)
     img = cv2.resize(img, DIM)
 
-    K=np.array([[225.57469247811056, 0.0, 280.0069549918857], [0.0, 221.40607131318117, 294.82435570493794], [0.0, 0.0, 1.0]])
-    D=np.array([[0.7302503082668154], [-0.18910060205317372], [-0.23997727800712282], [0.13938490908400802]])
-    h,w = img.shape[:2]
+    K = np.array([[225.57469247811056, 0.0, 280.0069549918857], [0.0, 221.40607131318117, 294.82435570493794], [0.0, 0.0, 1.0]])
+    D = np.array([[0.7302503082668154], [-0.18910060205317372], [-0.23997727800712282], [0.13938490908400802]])
+    h, w = img.shape[:2]
     map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
     undistorted_img = cv2.remap(img, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 

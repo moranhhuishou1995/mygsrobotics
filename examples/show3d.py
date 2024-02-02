@@ -131,6 +131,9 @@ def main(argv):
 
             # compute the depth map
             dm = nn.get_depthmap(f1, MASK_MARKERS_FLAG)
+            print(dm.shape)
+
+            print('Max depth:',np.max(dm))
 
             ''' Display the results '''
             vis3d.update(dm)

@@ -1,11 +1,10 @@
 CC = g++
-CFLAGS = -g -Wall -std=c++11 -O3 -Wall -shared -std=c++11 -undefined dynamic_lookup `python3 -m pybind11 --includes` -I ./
-SRCS = src/tracking_class.cpp 
-PROG = src/lib/find_marker`python3-config --extension-suffix`
+CFLAGS = -g -shared -Wall -std=c++11 -fPIC -I/usr/include/python3.8
+SRCS = tracking_class.cpp 
+PROG = find_marker.so
 
 $(PROG):$(SRCS)
-	mkdir -p src/lib
 	$(CC) $(CFLAGS) -o $(PROG) $(SRCS)
 
 clean:
-	rm src/lib/find_marker
+	rm -f find_marker.so

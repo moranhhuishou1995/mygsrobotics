@@ -17,7 +17,7 @@ def find_cameras():
         return cameras
     i = 10
     while i >= 0:
-        cap = cv2.VideoCapture(index)
+        cap = cv2.VideoCapture(2)
         if cap.read()[0]:
             command = 'v4l2-ctl -d ' + str(index) + ' --info'
             is_arducam = os.popen(command).read()
@@ -58,6 +58,8 @@ def resize_crop_mini(img, imgw, imgh):
     img = img[border_size_x:img.shape[0] - border_size_x, border_size_y:img.shape[1] - border_size_y]
     img = img[:, :-1]  # remove last column to get a popular image resolution
     img = cv2.resize(img, (imgw, imgh))  # final resize for 3d
+    #print(img.shape) # (240, 320, 3)
+    # img = img[10:230, 0:300] # crop image. if the gel pad is the originial one from GelSight mini, then remove this line
     return img
 
 def trim(img):
@@ -67,15 +69,15 @@ def trim(img):
 
 
 def compute_tracker_gel_stats(thresh):
-    numcircles = 9 * 7;
-    mmpp = .0625;
-    true_radius_mm = .5;
-    true_radius_pixels = true_radius_mm / mmpp;
+    numcircles = 9 * 7
+    mmpp = .0625
+    true_radius_mm = .5
+    true_radius_pixels = true_radius_mm / mmpp
     circles = np.where(thresh)[0].shape[0]
-    circlearea = circles / numcircles;
-    radius = np.sqrt(circlearea / np.pi);
-    radius_in_mm = radius * mmpp;
-    percent_coverage = circlearea / (np.pi * (true_radius_pixels) ** 2);
+    circlearea = circles / numcircles
+    radius = np.sqrt(circlearea / np.pi)
+    radius_in_mm = radius * mmpp
+    percent_coverage = circlearea / (np.pi * (true_radius_pixels) ** 2)
     return radius_in_mm, percent_coverage*100.
 
 
@@ -91,7 +93,8 @@ def main(argv):
     outdir = './TEST/'
     SAVE_VIDEO_FLAG = False
     SAVE_ONE_IMG_FLAG = False
-    SAVE_DATA_FLAG = False
+    # SAVE_DATA_FLAG = False
+    SAVE_DATA_FLAG = True
 
     if SAVE_ONE_IMG_FLAG:
         sn = input('Please enter the serial number of the gel \n')
@@ -111,13 +114,15 @@ def main(argv):
             os.mkdir(imgdir)
 
     if SAVE_DATA_FLAG:
+        timestr = time.strftime("%Y%m%d_%H%M%S")
         datadir = outdir + 'data'
-        datafilename = datadir + 'marker_locations.txt'
+        datafilename = datadir + os.sep + timestr + '.txt'
+        
         datafile = open(datafilename,"a")
 
-    # if len(sys.argv) > 1:
-    #     if sys.argv[1] == 'calibrate':
-    #         calibrate = True
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'calibrate':
+            calibrate = True
 
 
     if USE_LIVE_R1:
@@ -125,7 +130,8 @@ def main(argv):
         WHILE_COND = 1
     else:
         cameras = find_cameras()
-        cap = cv2.VideoCapture(cameras[0])
+        # print("camera list is:", cameras)
+        cap = cv2.VideoCapture(2)
         # cap = cv2.VideoCapture('http://pi:robits@raspiatgelsightinc.local:8080/?action=stream')
         WHILE_COND = cap.isOpened()
 

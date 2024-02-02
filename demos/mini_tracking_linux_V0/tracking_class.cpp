@@ -1,6 +1,7 @@
 // File Name: tracking.cpp
 // Author: Shaoxiong Wang
 // Create Time: 2018/12/20 10:11
+// modify:wangqi
 
 #include "tracking_class.h"
 #include <iostream>
@@ -90,7 +91,7 @@ void Matching::run(){
     missing = missing < 0 ? 0 : missing;
     spare = spare < 0 ? 0 : spare;
     dfs(0, 0, missing, spare);
-    for(int t=1;t<=3;t++) {
+    for(int t=1; t <= 3;t++) {
         if(minf == -1){
             // std::cout<<"TRY AGAIN!!"<<std::endl;
             memset(done, 0, sizeof(done));
